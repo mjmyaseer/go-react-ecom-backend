@@ -3,6 +3,7 @@ module backend
 go 1.19
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/jackc/pgconn v1.13.0
