@@ -402,3 +402,4 @@ postgres-data/base/1/112
 postgres-data
 .DS_Store
 .gitignore
+.idea
