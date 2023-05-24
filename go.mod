@@ -3,9 +3,9 @@ module backend
 go 1.19
 
 require (
-	github.com/davecgh/go-spew v1.1.1
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/golang-jwt/jwt/v4 v4.4.2
+	github.com/graphql-go/graphql v0.8.1
 	github.com/jackc/pgconn v1.13.0
 	github.com/jackc/pgx/v4 v4.17.2
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
