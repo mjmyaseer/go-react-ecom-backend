@@ -1,9 +1,12 @@
 package main
 
 import (
+	"backend/internal/graph"
 	"backend/internal/models"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -210,7 +213,7 @@ func (app *application) InsertMovie(w http.ResponseWriter, r *http.Request) {
 		app.errorJSON(w, err)
 		return
 	}
-	fmt.Println(movie)
+	
 	// try to get an image
 	movie = app.getPoster(movie)
 	movie.CreatedAt = time.Now()
@@ -238,13 +241,14 @@ func (app *application) InsertMovie(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) getPoster(movie models.Movie) models.Movie {
-	type TheMovieDB struct {
-		Page    int `json:"page"`
-		Results []struct {
-			PosterPath string `json:"poster_path"`
-		} `json:"results"`
-		TotalPages int `json:"total_pages"`
-	}
+	// // Commented because api key is not used and not fetching movie from external
+	// type TheMovieDB struct {
+	// 	Page    int `json:"page"`
+	// 	Results []struct {
+	// 		PosterPath string `json:"poster_path"`
+	// 	} `json:"results"`
+	// 	TotalPages int `json:"total_pages"`
+	// }
 
 	client := &http.Client{}
 	theUrl := fmt.Sprintf("https://api.themoviedb.org/3/search/movie?api_key=%s", app.APIKey)
@@ -361,4 +365,32 @@ func (app *application) AllMoviesByGenre(w http.ResponseWriter, r *http.Request)
 	}
 
 	app.writeJSON(w, http.StatusAccepted, movies)
+}
+
+func (app *application) MoviesGraphQL(w http.ResponseWriter, r *http.Request) {
+	// we need to populate our Graph type with movies
+	movies, _ := app.DB.AllMovies()
+
+	// get the query from the request
+	q, _ := io.ReadAll(r.Body)
+	query := string(q)
+
+	// create a new variable of type *graph.Graph
+	g:= graph.New(movies)
+
+	// set the query string on the variable
+	g.QueryString = query
+
+	// perform the query
+	resp, err := g.Query()
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	// send the response
+	j , _ := json.MarshalIndent(resp, "", "\t")
+	w.Header().Set("Content-Type","application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(j)
 }
